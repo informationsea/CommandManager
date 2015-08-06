@@ -1,4 +1,4 @@
-CommandManager
+CommandManager [![Build Status](https://travis-ci.org/informationsea/CommandManager.svg?branch=master)](https://travis-ci.org/informationsea/CommandManager)
 ==============
 
 Command manager is a library to build interactive command line shell or graphical shell from an `args4j` annotated
