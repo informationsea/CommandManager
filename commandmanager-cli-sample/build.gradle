@@ -1,0 +1,8 @@
+apply plugin: 'application'
+
+mainClassName = 'info.informationsea.commandmanager.cli.sample.LineEditor'
+
+dependencies {
+    compile project(':commandmanager-core')
+    compile project(':commandmanager-cli')
+}

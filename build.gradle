@@ -1,0 +1,94 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.projectlombok:lombok:1.14.8'
+    }
+}
+
+import lombok.delombok.Delombok
+
+apply plugin: 'java'
+
+task delombok << {
+    def delombokInstance = new Delombok()
+    rootProject.subprojects.each {
+        delombokInstance.addDirectory(file(it.projectDir.getAbsolutePath() + '/src/main/java'))
+
+        it.configurations.compile.dependencies.each {
+            println it
+        }
+    }
+
+    delombokInstance.setOutput(file("$buildDir/delomboked"))
+    delombokInstance.delombok()
+}
+
+javadoc.dependsOn(delombok)
+
+javadoc {
+    options.locale = 'en_US'
+    source "$buildDir/delomboked"
+}
+
+task javadocZip (type: Zip, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from "$buildDir/docs/javadoc"
+}
+
+allprojects {
+    apply plugin: 'java'
+
+    sourceCompatibility = 1.8
+    group = 'info.informationsea.commandmanager'
+    version = '0.0.1-SNAPSHOT'
+}
+
+
+subprojects {
+    apply plugin: 'jacoco'
+
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+
+    dependencies {
+        compile 'org.projectlombok:lombok:1.16.4'
+        compile 'org.slf4j:slf4j-api:1.7.12'
+        compile 'org.slf4j:slf4j-simple:1.7.12'
+        compile 'args4j:args4j:2.32'
+
+        testCompile 'junit:junit:4.12'
+    }
+
+    sourceSets {
+        main {
+            resources {
+                srcDirs = ['src/resources', "$buildDir/version"]
+            }
+        }
+    }
+
+    def versionInfoFile = file("$buildDir/version/META-INF/commandmanager/version.properties")
+
+    task createVersionInfoDirectory << {
+        versionInfoFile.parentFile.mkdirs()
+    }
+
+    task createGitInfoFile(type:Exec, dependsOn: createVersionInfoDirectory) {
+        commandLine "git", "log", "-n1", "--format=%h"
+        standardOutput = new ByteArrayOutputStream();
+        doLast {
+            def outputString = standardOutput.toString().trim()
+            if (outputString.length() > 0)
+                versionInfoFile.text = "git.commit=" + standardOutput.toString().trim() + "\nversion=" + version
+            else
+                versionInfoFile.text = "git.commit=UNKNOWN\nversion=" + version
+        }
+    }
+
+    processResources.dependsOn.add(createGitInfoFile)
+}

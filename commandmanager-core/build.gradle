@@ -1,0 +1,7 @@
+apply from: '../gradle/pub.gradle'
+
+
+ext {
+    packageName = "CommandManager Core Package"
+    description = "Manage commands with CLI/GUI core packages"
+}

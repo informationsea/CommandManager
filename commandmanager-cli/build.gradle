@@ -1,0 +1,11 @@
+apply from: '../gradle/pub.gradle'
+
+ext {
+    packageName = "CommandManager CLI Package"
+    description = "Manage commands with CLI"
+}
+
+dependencies {
+    compile project(':commandmanager-core')
+    compile 'jline:jline:2.12.1'
+}
