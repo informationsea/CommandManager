@@ -18,6 +18,7 @@
 
 package info.informationsea.commandmanager.cli;
 
+import info.informationsea.commandmanager.core.ManagedCommand;
 import jline.console.completer.*;
 import lombok.Getter;
 import lombok.Value;
@@ -68,13 +69,14 @@ public class CLICommandCompleter implements Completer {
         List<ShellParser.ArgumentAndPosition> shellParsed = ShellParser.parseShellLineWithPosition(buffer.substring(0, cursor));
         if (buffer.length() > 0 && Character.isWhitespace(buffer.charAt(buffer.length() - 1)))
             shellParsed.add(new ShellParser.ArgumentAndPosition(buffer.length(), ""));
-        //log.info("parsed {}", shellParsed);
-        if (shellParsed.size() == 0) {
+
+        if (shellParsed.size() == 0) { // buffer is empty
             return firstCommandCompleter.complete("", 0, candidates);
-        } else  if (shellParsed.size() == 1) {
+        } else  if (shellParsed.size() == 1) { // complete command name
             return firstCommandCompleter.complete(shellParsed.get(0).getArg(), cursor, candidates);
         }
 
+        // complete command options
         OptionInfo info = optionInfoMap.get(shellParsed.get(0).getArg());
         ShellParser.ArgumentAndPosition lastComponent = shellParsed.get(shellParsed.size()-1);
 
@@ -82,10 +84,21 @@ public class CLICommandCompleter implements Completer {
             ShellParser.ArgumentAndPosition oneBeforeLast = shellParsed.get(shellParsed.size() - 2);
             OptionHandler oh = info.getOptions().get(oneBeforeLast.getArg());
             if (oh != null && ! (oh instanceof BooleanOptionHandler)) {
+
+                Completer c = new NullCompleter();
+
                 if (oh instanceof FileOptionHandler) {
-                    return new FileNameCompleter().complete(lastComponent.getArg(), cursor - lastComponent.getPosition(), candidates) + lastComponent.getPosition();
+                    c = new FileNameCompleter();
+                } else {
+                    ManagedCommand command = commandManager.getCommandInstance(shellParsed.get(0).getArg());
+                    List<String> optionCandidates = command.getCandidateForOption(oneBeforeLast.getArg());
+                    log.info("optionCandidates {} for {}", optionCandidates, oneBeforeLast.getArg());
+                    if (optionCandidates != null) {
+                        c = new StringsCompleter(optionCandidates);
+                    }
                 }
-                return new NullCompleter().complete(lastComponent.getArg(), cursor - lastComponent.getPosition(), candidates) + lastComponent.getPosition();
+
+                return c.complete(lastComponent.getArg(), cursor - lastComponent.getPosition(), candidates) + lastComponent.getPosition();
             }
         }
 
@@ -105,6 +118,17 @@ public class CLICommandCompleter implements Completer {
         try {
             if (info.getArguments().get(argIndex) instanceof FileOptionHandler) {
                 c = new FileNameCompleter();
+            } else {
+                ManagedCommand command = commandManager.getCommandInstance(shellParsed.get(0).getArg());
+
+                if (command instanceof CLICommandManager.CLIBuiltinCommand) {
+                    ((CLICommandManager.CLIBuiltinCommand) command).setCommandManager(commandManager);
+                }
+
+                List<String> argumentCandidates = command.getCandidateForArgument(argIndex);
+                if (argumentCandidates != null) {
+                    c = new StringsCompleter(argumentCandidates);
+                }
             }
         } catch (IndexOutOfBoundsException e) {
             // ignore

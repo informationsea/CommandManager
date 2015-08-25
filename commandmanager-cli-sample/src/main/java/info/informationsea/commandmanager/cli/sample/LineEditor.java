@@ -39,6 +39,7 @@ public class LineEditor {
         commandManager.addCommand("replace", Replace.class);
         commandManager.addCommand("save", Save.class);
         commandManager.addCommand("print", Print.class);
+        commandManager.setContext(new LineEditorContext());
 
         try {
             commandManager.startConsole();
@@ -47,9 +48,20 @@ public class LineEditor {
         }
     }
 
-    public static List<String> lines = null;
+    private static class LineEditorContext {
+        public List<String> lines = null;
+    }
 
-    public static class Load implements ManagedCommand {
+    public abstract static class LineEditorCommand implements ManagedCommand {
+        protected List<String> lines = null;
+
+        @Override
+        public void setContext(Object context) {
+            this.lines = ((LineEditorContext) context).lines;
+        }
+    }
+
+    public static class Load extends LineEditorCommand {
 
         @Argument(required = true, usage = "A file to load")
         File file;
@@ -69,7 +81,14 @@ public class LineEditor {
         }
     }
 
-    public static class Insert implements ManagedCommand {
+    public static class Insert extends LineEditorCommand {
+
+        private List<String> lines = null;
+
+        @Override
+        public void setContext(Object context) {
+            this.lines = ((LineEditorContext) context).lines;
+        }
 
         @Argument(required = true, usage = "new line content")
         String newline = "";
@@ -85,9 +104,11 @@ public class LineEditor {
                 lines.add(newline);
             }
         }
+
+
     }
 
-    public static class Replace implements ManagedCommand {
+    public static class Replace extends LineEditorCommand {
 
         @Option(name = "-target", required = true, usage = "Replacement target")
         String target;
@@ -101,7 +122,8 @@ public class LineEditor {
         }
     }
 
-    public static class Save implements ManagedCommand {
+    public static class Save extends LineEditorCommand {
+
 
         @Argument(required = true)
         File file;
@@ -116,7 +138,7 @@ public class LineEditor {
         }
     }
 
-    public static class Print implements ManagedCommand {
+    public static class Print extends LineEditorCommand {
 
         @Override
         public void execute() throws Exception {

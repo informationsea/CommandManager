@@ -26,6 +26,7 @@ import java.util.Properties;
 
 /**
  * Resolve the version of CommandManager
+ * @author Yasunobu OKAMURA
  */
 @Slf4j
 public class CommandManagerVersionResolver {

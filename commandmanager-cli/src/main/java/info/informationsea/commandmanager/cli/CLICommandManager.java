@@ -29,6 +29,7 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -186,7 +187,7 @@ public class CLICommandManager extends CommandManager {
     }
 
     /**
-     * Master
+     * Super class of CLI command manager built-in commands
      */
     public abstract static class CLIBuiltinCommand implements ManagedCommand {
         @Setter @Getter
@@ -205,7 +206,7 @@ public class CLICommandManager extends CommandManager {
                 for (String one : commandManager.getCommands().keySet()) {
                     System.err.printf("   %s\n", one);
                 }
-                for (String one : new String[]{"exit", "clear"}) {
+                for (String one : new String[]{"exit", "clear", "source"}) {
                     System.err.printf("   %s\n", one);
                 }
             } else {
@@ -227,6 +228,19 @@ public class CLICommandManager extends CommandManager {
                         parser.printUsage(System.err);
                 }
             }
+        }
+
+        @Override
+        public List<String> getCandidateForArgument(int index) {
+            if (index == 0) {
+                ArrayList<String> list = new ArrayList<>();
+                list.addAll(commandManager.getCommands().keySet());
+                list.add("exit");
+                list.add("clear");
+                list.add("source");
+                return list;
+            }
+            return null;
         }
     }
 

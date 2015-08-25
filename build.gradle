@@ -84,7 +84,7 @@ subprojects {
         doLast {
             def outputString = standardOutput.toString().trim()
             if (outputString.length() > 0)
-                versionInfoFile.text = "git.commit=" + standardOutput.toString().trim() + "\nversion=" + version
+                versionInfoFile.text = "git.commit=" + outputString + "\nversion=" + version
             else
                 versionInfoFile.text = "git.commit=UNKNOWN\nversion=" + version
         }

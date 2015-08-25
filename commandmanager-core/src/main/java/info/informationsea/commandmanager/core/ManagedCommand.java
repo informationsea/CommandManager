@@ -18,10 +18,15 @@
 
 package info.informationsea.commandmanager.core;
 
+import java.util.List;
+
 /**
  * A managed command.
  * Classes implemented this interface should annotate parameters with args4j.
  * CommandManager recognize the annotation, and prepare CLI or GUI for commands.
+ * @implNote CommandManager create an instance while creating complete database and completing.
+ * Please minimize constructor and setContext method to fast completing.
+ * @author Yasunobu OKAMURA
  */
 public interface ManagedCommand {
     /**
@@ -36,4 +41,8 @@ public interface ManagedCommand {
      * @param context a context object.
      */
     default void setContext(Object context) {}
+
+    default List<String> getCandidateForOption(String name) {return null;}
+
+    default List<String> getCandidateForArgument(int index) {return null;}
 }

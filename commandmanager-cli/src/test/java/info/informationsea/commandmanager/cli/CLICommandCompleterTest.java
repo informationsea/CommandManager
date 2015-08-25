@@ -55,6 +55,9 @@ public class CLICommandCompleterTest {
 
         assertCompleter(Arrays.<CharSequence>asList("-a", "-method", "-output", "-v"), 7, completer, "acacia -", 8);
         assertCompleter(Arrays.<CharSequence>asList("-a", "-method", "-output"), 10, completer, "acacia -v -", 11);
+
+        assertCompleter(Arrays.asList("TEST1", "TEST2", "TEST3"), 15, completer, "acacia -method ", 15);
+        assertCompleter(Arrays.asList("argument1", "argument2"), 7, completer, "acacia a", 8);
     }
 
     public void assertCompleter(List<CharSequence> expectedList, int expectedPosition, Completer completer, String buffer, int cursor) {
@@ -109,6 +112,26 @@ public class CLICommandCompleterTest {
         @Override
         public void execute() {
             log.info("execute {} {}", a, v);
+        }
+
+        @Override
+        public List<String> getCandidateForOption(String name) {
+            switch (name) {
+                case "-v":
+                    return Arrays.asList("1", "2");
+                case "-method":
+                    return Arrays.asList("TEST1", "TEST2", "TEST3");
+            }
+            return null;
+        }
+
+        @Override
+        public List<String> getCandidateForArgument(int index) {
+            switch (index) {
+                case 0:
+                    return Arrays.asList("argument1", "argument2");
+            }
+            return null;
         }
     }
 }

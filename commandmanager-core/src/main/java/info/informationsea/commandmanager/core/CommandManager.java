@@ -26,6 +26,7 @@ import java.util.Map;
 
 /**
  * Manage commands.
+ * @author Yasunobu OKAMURA
  */
 public class CommandManager {
     private Map<String, Class> commands = new HashMap<>();
@@ -33,6 +34,12 @@ public class CommandManager {
     @Getter @Setter
     private Object context = null;
 
+    /**
+     * Register a new command to command manager.
+     * @param name a command name
+     * @param command a class of ManagedCommand
+     * @param <T> a ManagedCommand
+     */
     public <T extends ManagedCommand> void addCommand(String name, Class<T> command) {
         if (commands.containsKey(name)) {
             throw new IllegalArgumentException("Command name is duplicated");
@@ -40,10 +47,19 @@ public class CommandManager {
         commands.put(name, command);
     }
 
+    /**
+     * Get a list of commands.
+     * @return a list fo commands.
+     */
     public Map<String, Class> getCommands() {
         return new HashMap<>(commands);
     }
 
+    /**
+     * Get a instance of ManagedCommand that corresponding to the name
+     * @param name a command name
+     * @return a instance of ManagedCommand
+     */
     public ManagedCommand getCommandInstance(String name) {
         Class clazz = getCommandForName(name);
         try {
@@ -56,6 +72,11 @@ public class CommandManager {
         }
     }
 
+    /**
+     * get a Class of ManagedCommand corresponding to the name
+     * @param name a command name
+     * @return a Class of ManagedCommand
+     */
     public Class getCommandForName(String name) {
         return commands.get(name);
     }
