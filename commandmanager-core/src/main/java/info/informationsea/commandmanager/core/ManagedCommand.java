@@ -24,7 +24,7 @@ import java.util.List;
  * A managed command.
  * Classes implemented this interface should annotate parameters with args4j.
  * CommandManager recognize the annotation, and prepare CLI or GUI for commands.
- * @implNote CommandManager create an instance while creating complete database and completing.
+ * CommandManager create an instance while creating complete database and completing.
  * Please minimize constructor and setContext method to fast completing.
  * @author Yasunobu OKAMURA
  */
@@ -42,7 +42,17 @@ public interface ManagedCommand {
      */
     default void setContext(Object context) {}
 
+    /**
+     * Get candidate values for option `name`
+     * @param name option name include '-'
+     * @return candidate values.
+     */
     default List<String> getCandidateForOption(String name) {return null;}
 
+    /**
+     * Get candidate values for an argument
+     * @param index an argument index
+     * @return candidate values.
+     */
     default List<String> getCandidateForArgument(int index) {return null;}
 }
