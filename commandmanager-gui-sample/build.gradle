@@ -1,0 +1,7 @@
+apply plugin: 'application'
+
+mainClassName = 'info.informationsea.commandmanager.gui.sample.LineEditor'
+
+dependencies {
+    compile project(':commandmanager-gui')
+}
