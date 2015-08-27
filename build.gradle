@@ -42,7 +42,7 @@ allprojects {
 
     sourceCompatibility = 1.8
     group = 'info.informationsea.commandmanager'
-    version = '0.0.2-SNAPSHOT'
+    version = '0.0.2'
 }
 
 

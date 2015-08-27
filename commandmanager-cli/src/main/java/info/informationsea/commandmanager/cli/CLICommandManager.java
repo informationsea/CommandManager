@@ -26,7 +26,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
 import java.io.*;
@@ -52,7 +51,7 @@ public class CLICommandManager extends CommandManager {
     }
 
     /**
-     * Execute commands in the raw line. The raw line will be parsed with ShellParser.
+     * Execute commands in the raw line. The raw line will be parsed with {@code ShellParser}.
      * @param line commands. Commands should be separated by ';'
      * @throws Exception Commands may throw Exception.
      */
@@ -84,7 +83,7 @@ public class CLICommandManager extends CommandManager {
     }
 
     /**
-     * Execute a commands in the raw line. The raw line will be parsed with ShellParser.
+     * Execute a commands in the raw line. The raw line will be parsed with {@code ShellParser}.
      * @param line a command and its arguments.
      * @throws Exception A command may throw Exception.
      */
@@ -112,11 +111,11 @@ public class CLICommandManager extends CommandManager {
     /**
      * Get a configured commands in the raw line.
      * Parameters of a command are configured with arguments.
-     * The raw line will be parsed with ShellParser.
+     * The raw line will be parsed with {@code ShellParser}.
      * @param line a command and its arguments.
-     * @throws CmdLineException A argument parser may throw Exception.
+     * @throws Exception A argument parser may throw Exception.
      */
-    public ManagedCommand getConfiguredCommandInstance(String line) throws CmdLineException {
+    public ManagedCommand getConfiguredCommandInstance(String line) throws Exception {
         List<String> args = ShellParser.parseShellLine(line);
         return getConfiguredCommandInstance(args.toArray(new String[args.size()]));
     }
@@ -125,9 +124,9 @@ public class CLICommandManager extends CommandManager {
      * Get a configured commands with a string array.
      * Parameters of a command are configured with arguments.
      * @param args a command and its arguments.
-     * @throws CmdLineException A argument parser may throw Exception.
+     * @throws Exception A argument parser may throw Exception.
      */
-    public ManagedCommand getConfiguredCommandInstance(String[] args) throws CmdLineException {
+    public ManagedCommand getConfiguredCommandInstance(String[] args) throws Exception {
         ManagedCommand command = getCommandInstance(args[0]);
         String[] commandArgs = new String[args.length-1];
         System.arraycopy(args, 1, commandArgs, 0, args.length - 1);

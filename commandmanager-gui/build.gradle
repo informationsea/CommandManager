@@ -1,4 +1,4 @@
-//apply from: '../gradle/pub.gradle'
+apply from: '../gradle/pub.gradle'
 
 ext {
     packageName = "CommandManager GUI Package"
