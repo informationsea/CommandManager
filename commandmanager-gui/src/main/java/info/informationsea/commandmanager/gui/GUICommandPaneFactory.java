@@ -53,7 +53,7 @@ public class GUICommandPaneFactory {
 
     /**
      * Get a configuration pane and its properties.
-     * An empty {@code Map<String, ObservableValue>
+     * An empty {@code Map<String, ObservableValue>}
      * @param commandName a name of command
      * @param option2property an empty Map to store properties
      * @return a configuration pane.
