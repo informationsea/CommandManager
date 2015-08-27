@@ -18,6 +18,7 @@
 
 package info.informationsea.commandmanager.cli;
 
+import info.informationsea.commandmanager.core.CommandResult;
 import info.informationsea.commandmanager.core.ManagedCommand;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -99,11 +100,12 @@ public class CLICommandManagerTest {
         private Context context = null;
 
         @Override
-        public void execute() {
+        public CommandResult execute() {
             //log.info("execute {} {}", a, v);
             context.map.put("a", String.valueOf(a));
             context.map.put("v", String.valueOf(v));
             context.map.put("s", s);
+            return new CommandResult(null, CommandResult.ResultState.SUCCESS);
         }
 
         @Override
@@ -117,8 +119,9 @@ public class CLICommandManagerTest {
         private Context context;
 
         @Override
-        public void execute() throws Exception {
+        public CommandResult execute() throws Exception {
             context.map.put("2", "true");
+            return new CommandResult(null, CommandResult.ResultState.SUCCESS);
         }
 
         @Override

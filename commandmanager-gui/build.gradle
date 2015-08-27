@@ -1,0 +1,10 @@
+//apply from: '../gradle/pub.gradle'
+
+ext {
+    packageName = "CommandManager GUI Package"
+    description = "Manage commands with GUI"
+}
+
+dependencies {
+    compile project(':commandmanager-core')
+}

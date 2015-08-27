@@ -18,12 +18,11 @@
 
 package info.informationsea.commandmanager.cli;
 
+import info.informationsea.commandmanager.core.CommandManager;
 import info.informationsea.commandmanager.core.ManagedCommand;
 import jline.console.completer.*;
 import lombok.Getter;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.spi.BooleanOptionHandler;
 import org.kohsuke.args4j.spi.FileOptionHandler;
 import org.kohsuke.args4j.spi.OptionHandler;
@@ -43,7 +42,7 @@ public class CLICommandCompleter implements Completer {
     @Getter
     private CLICommandManager commandManager;
 
-    private Map<String, OptionInfo> optionInfoMap = new HashMap<>();
+    private Map<String, StringsCompleter> optionCompleter = new HashMap<>();
     private StringsCompleter firstCommandCompleter;
 
     public CLICommandCompleter(CLICommandManager manager) {
@@ -51,13 +50,9 @@ public class CLICommandCompleter implements Completer {
 
         Map<String, Class> map = commandManager.getCommands();
         for (Map.Entry<String, Class> entry : map.entrySet()) {
-            try {
-                Object bean = entry.getValue().newInstance();
-                CmdLineParser parser = new CmdLineParser(bean);
-                optionInfoMap.put(entry.getKey(), new OptionInfo(parser.getOptions(), parser.getArguments()));
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
+
+            CommandManager.OptionInfo optionInfo = commandManager.getOptionInfoForName(entry.getKey());
+            optionCompleter.put(entry.getKey(), new StringsCompleter(optionInfo.getOptions().values().stream().map(o -> o.option.toString()).toArray(String[]::new)));
         }
 
         //log.info("keys {}", (Object)map.keySet().stream().toArray(String[]::new));
@@ -77,7 +72,7 @@ public class CLICommandCompleter implements Completer {
         }
 
         // complete command options
-        OptionInfo info = optionInfoMap.get(shellParsed.get(0).getArg());
+        CommandManager.OptionInfo info = commandManager.getOptionInfoForName(shellParsed.get(0).getArg());
         ShellParser.ArgumentAndPosition lastComponent = shellParsed.get(shellParsed.size()-1);
 
         if (shellParsed.size() > 2) {
@@ -92,7 +87,7 @@ public class CLICommandCompleter implements Completer {
                 } else {
                     ManagedCommand command = commandManager.getCommandInstance(shellParsed.get(0).getArg());
                     List<String> optionCandidates = command.getCandidateForOption(oneBeforeLast.getArg());
-                    log.info("optionCandidates {} for {}", optionCandidates, oneBeforeLast.getArg());
+                    //log.info("optionCandidates {} for {}", optionCandidates, oneBeforeLast.getArg());
                     if (optionCandidates != null) {
                         c = new StringsCompleter(optionCandidates);
                     }
@@ -134,7 +129,7 @@ public class CLICommandCompleter implements Completer {
             // ignore
         }
 
-        int pos = new AggregateCompleter(info.getCompleter(), c).
+        int pos = new AggregateCompleter(optionCompleter.get(shellParsed.get(0).getArg()), c).
                 complete(lastComponent.getArg(), cursor - lastComponent.getPosition(), candidates) + lastComponent.getPosition();
 
         for (ShellParser.ArgumentAndPosition one : shellParsed.subList(1, shellParsed.size())) {
@@ -147,22 +142,4 @@ public class CLICommandCompleter implements Completer {
         return pos;
     }
 
-    @Value
-    private class OptionInfo {
-        private Map<String, OptionHandler> options;
-        private List<OptionHandler> arguments;
-        private StringsCompleter completer;
-
-        public OptionInfo(List<OptionHandler> options, List<OptionHandler> arguments) {
-            this.options = new HashMap<>();
-            this.arguments = arguments;
-
-            for (OptionHandler one : options) {
-                this.options.put(one.option.toString(), one);
-                //log.info("option {} {}", one, one.option.toString());
-            }
-
-            completer = new StringsCompleter(options.stream().map(o -> o.option.toString()).toArray(String[]::new));
-        }
-    }
 }

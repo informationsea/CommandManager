@@ -20,8 +20,12 @@ package info.informationsea.commandmanager.core;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Value;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.spi.OptionHandler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,6 +38,8 @@ public class CommandManager {
     @Getter @Setter
     private Object context = null;
 
+    private Map<String, OptionInfo> optionInfoMap = new HashMap<>();
+
     /**
      * Register a new command to command manager.
      * @param name a command name
@@ -45,6 +51,14 @@ public class CommandManager {
             throw new IllegalArgumentException("Command name is duplicated");
         }
         commands.put(name, command);
+
+        try {
+            Object bean = command.newInstance();
+            CmdLineParser parser = new CmdLineParser(bean);
+            optionInfoMap.put(name, new OptionInfo(parser.getOptions(), parser.getArguments()));
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -79,5 +93,34 @@ public class CommandManager {
      */
     public Class getCommandForName(String name) {
         return commands.get(name);
+    }
+
+    /**
+     * Get command options and arguments for the name
+     * @param name a command name
+     * @return a list of command options and arguments
+     */
+    public OptionInfo getOptionInfoForName(String name) {
+        return optionInfoMap.get(name);
+    }
+
+    /**
+     * Command Option Information.
+     * The list of command options and arguments.
+     */
+    @Value
+    public static class OptionInfo {
+        private Map<String, OptionHandler> options;
+        private List<OptionHandler> arguments;
+
+        public OptionInfo(List<OptionHandler> options, List<OptionHandler> arguments) {
+            this.options = new HashMap<>();
+            this.arguments = arguments;
+
+            for (OptionHandler one : options) {
+                this.options.put(one.option.toString(), one);
+                //log.info("option {} {}", one, one.option.toString());
+            }
+        }
     }
 }

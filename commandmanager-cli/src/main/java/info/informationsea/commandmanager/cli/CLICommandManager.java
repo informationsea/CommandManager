@@ -19,6 +19,7 @@
 package info.informationsea.commandmanager.cli;
 
 import info.informationsea.commandmanager.core.CommandManager;
+import info.informationsea.commandmanager.core.CommandResult;
 import info.informationsea.commandmanager.core.ManagedCommand;
 import jline.console.ConsoleReader;
 import lombok.Getter;
@@ -102,7 +103,10 @@ public class CLICommandManager extends CommandManager {
         if (managedCommand == null) {
             throw new IllegalArgumentException("Command is not found");
         }
-        managedCommand.execute();
+        CommandResult result = managedCommand.execute();
+        if (result.getResult() != null) {
+            System.out.println(result.getResult());
+        }
     }
 
     /**
@@ -200,34 +204,40 @@ public class CLICommandManager extends CommandManager {
         private String command = null;
 
         @Override
-        public void execute() throws Exception {
+        public CommandResult execute() throws Exception {
+            StringBuilder builder = new StringBuilder();
             if (command == null) {
                 System.err.println("Command List:");
                 for (String one : commandManager.getCommands().keySet()) {
-                    System.err.printf("   %s\n", one);
+                    builder.append(String.format("   %s\n", one));
                 }
                 for (String one : new String[]{"exit", "clear", "source"}) {
-                    System.err.printf("   %s\n", one);
+                    builder.append(String.format("   %s\n", one));
                 }
             } else {
                 switch (command) {
                     case "exit":
-                        System.err.println("exit : exit this program");
+                        builder.append("exit : exit this program\n");
                         break;
                     case "clear":
-                        System.err.println("clear : clear screen");
+                        builder.append("clear : clear screen\n");
                         break;
                     case "source":
-                        System.err.println("source FILE: load script");
+                        builder.append("source FILE: load script\n");
                         break;
                     default:
                         CmdLineParser parser = new CmdLineParser(commandManager.getCommandInstance(command));
-                        System.err.printf("%s ", command);
-                        parser.printSingleLineUsage(System.err);
-                        System.err.println();
-                        parser.printUsage(System.err);
+                        builder.append(command).append(" ");
+
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        PrintStream ps = new PrintStream(outputStream);
+                        parser.printSingleLineUsage(ps);
+                        ps.println();
+                        parser.printUsage(ps);
+                        builder.append(outputStream.toString("utf-8"));
                 }
             }
+            return new CommandResult(builder.toString(), CommandResult.ResultState.SUCCESS);
         }
 
         @Override
@@ -250,8 +260,9 @@ public class CLICommandManager extends CommandManager {
         private File source;
 
         @Override
-        public void execute() throws Exception {
+        public CommandResult execute() throws Exception {
             commandManager.loadScript(new FileReader(source));
+            return new CommandResult(null, CommandResult.ResultState.SUCCESS);
         }
     }
 }

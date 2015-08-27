@@ -18,6 +18,7 @@
 
 package info.informationsea.commandmanager.cli;
 
+import info.informationsea.commandmanager.core.CommandResult;
 import info.informationsea.commandmanager.core.ManagedCommand;
 import jline.console.completer.Completer;
 import lombok.Getter;
@@ -80,8 +81,9 @@ public class CLICommandCompleterTest {
         String s = "default";
 
         @Override
-        public void execute() {
+        public CommandResult execute() {
             log.info("execute {} {}", a, v);
+            return new CommandResult(null, CommandResult.ResultState.SUCCESS);
         }
     }
 
@@ -110,8 +112,9 @@ public class CLICommandCompleterTest {
         String s = "default";
 
         @Override
-        public void execute() {
+        public CommandResult execute() {
             log.info("execute {} {}", a, v);
+            return new CommandResult(null, CommandResult.ResultState.SUCCESS);
         }
 
         @Override

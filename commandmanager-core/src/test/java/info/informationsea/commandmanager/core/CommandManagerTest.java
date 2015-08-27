@@ -50,7 +50,9 @@ public class CommandManagerTest {
         String commandName = "hello";
 
         @Override
-        public void execute() {}
+        public CommandResult execute() {
+            return new CommandResult(null, CommandResult.ResultState.SUCCESS);
+        }
     }
 
     public static class TestCommand2 implements ManagedCommand {
@@ -58,7 +60,9 @@ public class CommandManagerTest {
         String commandName = "hello2";
 
         @Override
-        public void execute() {}
+        public CommandResult execute() {
+            return new CommandResult(null, CommandResult.ResultState.SUCCESS);
+        }
     }
 
     public static class TestCommand3 implements ManagedCommand {
@@ -66,6 +70,8 @@ public class CommandManagerTest {
         String commandName = "hello";
 
         @Override
-        public void execute() {}
+        public CommandResult execute() {
+            return new CommandResult(null, CommandResult.ResultState.SUCCESS);
+        }
     }
 }

@@ -32,8 +32,9 @@ public interface ManagedCommand {
     /**
      * Execute this command.
      * @throws Exception this command may throw Exception
+     * @return Result
      */
-    void execute() throws Exception;
+    CommandResult execute() throws Exception;
 
     /**
      * Set a context object by CommandManager

@@ -22,4 +22,5 @@ include 'commandmanager-core'
 
 rootProject.name = 'CommandManager'
 include 'commandmanager-cli-sample'
+include 'commandmanager-gui-sample'
 

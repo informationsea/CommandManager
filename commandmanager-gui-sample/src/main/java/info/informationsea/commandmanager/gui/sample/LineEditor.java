@@ -16,11 +16,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package info.informationsea.commandmanager.cli.sample;
+package info.informationsea.commandmanager.gui.sample;
 
-import info.informationsea.commandmanager.cli.CLICommandManager;
+import info.informationsea.commandmanager.core.CommandManager;
 import info.informationsea.commandmanager.core.CommandResult;
 import info.informationsea.commandmanager.core.ManagedCommand;
+import info.informationsea.commandmanager.gui.GUICommandPaneFactory;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Accordion;
+import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
@@ -28,14 +33,24 @@ import org.kohsuke.args4j.Option;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Example of CLICommandManager usage
+ * Sample GUI Line Editor.
+ * @author OKAMURA Yasunobu
  */
-public class LineEditor {
-    public static void main(String ... args) {
-        CLICommandManager commandManager = new CLICommandManager();
+public class LineEditor extends Application {
+
+    private CommandManager commandManager = new CommandManager();
+    private GUICommandPaneFactory factory = new GUICommandPaneFactory(commandManager);
+
+    public static void main(String ...args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
         commandManager.addCommand("load", Load.class);
         commandManager.addCommand("insert", Insert.class);
         commandManager.addCommand("replace", Replace.class);
@@ -43,11 +58,16 @@ public class LineEditor {
         commandManager.addCommand("print", Print.class);
         commandManager.setContext(new LineEditorContext());
 
-        try {
-            commandManager.startConsole();
-        } catch (IOException e) {
-            e.printStackTrace();
+        Accordion accordion = new Accordion();
+        for (Map.Entry<String, Class> entry : commandManager.getCommands().entrySet()) {
+            accordion.getPanes().add(factory.getCommandPane(entry.getKey()));
         }
+
+        accordion.setPrefSize(800, 600);
+        Scene scene = new Scene(accordion);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Line Editor Sample");
+        primaryStage.show();
     }
 
     private static class LineEditorContext {
@@ -75,7 +95,6 @@ public class LineEditor {
                 lines.clear();
                 String line;
                 while ((line = br.readLine()) != null) {
-                    log.info("loading {}", line);
                     if (line.endsWith("\n"))
                         lines.add(line.substring(0, line.length()-1));
                     else
@@ -114,7 +133,7 @@ public class LineEditor {
         @Option(name = "-replacement" ,required = true, usage = "new text")
         String replacement;
 
-        @Option(name = "-regexp", usage = "Use regular expression")
+        @Option(name = "-regexp", usage = "Use regular expression (dummy)")
         boolean regexp;
 
         @Override
@@ -148,7 +167,10 @@ public class LineEditor {
         @Override
         public CommandResult execute() throws Exception {
             StringBuilder buffer = new StringBuilder();
-            lines.forEach(buffer::append);
+            lines.forEach(s -> {
+                buffer.append(s);
+                buffer.append('\n');
+            });
             return new CommandResult(buffer.toString(), CommandResult.ResultState.SUCCESS);
         }
     }
