@@ -37,6 +37,8 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.spi.*;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,6 +152,7 @@ public class GUICommandPaneFactory {
                 alert.show();
             } catch (Exception e1) {
                 e1.printStackTrace();
+                showExceptionAlert("Failed to run", e1);
             }
         });
 
@@ -212,5 +215,19 @@ public class GUICommandPaneFactory {
         return textField.textProperty();
     }
 
+    public static void showExceptionAlert(String headerText, Throwable th) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        th.printStackTrace(pw);
 
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setHeaderText(headerText);
+
+        alert.setContentText(th.getMessage());
+
+        TextArea textArea = new TextArea(sw.toString());
+        textArea.setEditable(false);
+        alert.getDialogPane().setExpandableContent(textArea);
+        alert.showAndWait();
+    }
 }
