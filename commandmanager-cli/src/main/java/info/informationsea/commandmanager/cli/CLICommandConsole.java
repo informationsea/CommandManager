@@ -40,14 +40,19 @@ import java.util.List;
  * @author Yasunobu OKAMURA
  */
 @Slf4j
-public class CLICommandManager extends CommandManager {
+public class CLICommandConsole {
+
+    @Getter
+    private CommandManager commandManager;
 
     /**
-     * Default constructor
+     * Create CLICommandConsole to start console prompt.
+     * @param commandManager A command manager object.
      */
-    public CLICommandManager() {
-        addCommand("help", CLIHelpCommand.class);
-        addCommand("source", CLISourceCommand.class);
+    public CLICommandConsole(CommandManager commandManager) {
+        this.commandManager = commandManager;
+        commandManager.addCommand("help", CLIHelpCommand.class);
+        commandManager.addCommand("source", CLISourceCommand.class);
     }
 
     /**
@@ -127,14 +132,14 @@ public class CLICommandManager extends CommandManager {
      * @throws Exception A argument parser may throw Exception.
      */
     public ManagedCommand getConfiguredCommandInstance(String[] args) throws Exception {
-        ManagedCommand command = getCommandInstance(args[0]);
+        ManagedCommand command = commandManager.getCommandInstance(args[0]);
         String[] commandArgs = new String[args.length-1];
         System.arraycopy(args, 1, commandArgs, 0, args.length - 1);
         CmdLineParser parser = new CmdLineParser(command);
         parser.parseArgument(commandArgs);
 
         if (command instanceof CLIBuiltinCommand) {
-            ((CLIBuiltinCommand) command).setCommandManager(this);
+            ((CLIBuiltinCommand) command).setCommandConsole(this);
         }
 
         return command;
@@ -194,7 +199,7 @@ public class CLICommandManager extends CommandManager {
      */
     public abstract static class CLIBuiltinCommand implements ManagedCommand {
         @Setter @Getter
-        protected CLICommandManager commandManager;
+        protected CLICommandConsole commandConsole;
     }
 
     public static class CLIHelpCommand extends CLIBuiltinCommand {
@@ -207,7 +212,7 @@ public class CLICommandManager extends CommandManager {
             StringBuilder builder = new StringBuilder();
             if (command == null) {
                 System.err.println("Command List:");
-                for (String one : commandManager.getCommands().keySet()) {
+                for (String one : commandConsole.getCommandManager().getCommands().keySet()) {
                     builder.append(String.format("   %s\n", one));
                 }
                 for (String one : new String[]{"exit", "clear", "source"}) {
@@ -225,7 +230,7 @@ public class CLICommandManager extends CommandManager {
                         builder.append("source FILE: load script\n");
                         break;
                     default:
-                        CmdLineParser parser = new CmdLineParser(commandManager.getCommandInstance(command));
+                        CmdLineParser parser = new CmdLineParser(commandConsole.getCommandManager().getCommandInstance(command));
                         builder.append(command).append(" ");
 
                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -243,7 +248,7 @@ public class CLICommandManager extends CommandManager {
         public List<String> getCandidateForArgument(int index) {
             if (index == 0) {
                 ArrayList<String> list = new ArrayList<>();
-                list.addAll(commandManager.getCommands().keySet());
+                list.addAll(commandConsole.getCommandManager().getCommands().keySet());
                 list.add("exit");
                 list.add("clear");
                 list.add("source");
@@ -260,7 +265,7 @@ public class CLICommandManager extends CommandManager {
 
         @Override
         public CommandResult execute() throws Exception {
-            commandManager.loadScript(new FileReader(source));
+            commandConsole.loadScript(new FileReader(source));
             return new CommandResult(null, CommandResult.ResultState.SUCCESS);
         }
     }

@@ -4,11 +4,11 @@ CommandManager [![Build Status](https://travis-ci.org/informationsea/CommandMana
 Command manager is a library to build interactive command line shell or graphical shell from an `args4j` annotated
 command object.
 
-Status
+Examples
 ------
 
-* CLI : OK. See [LineEditor](commandmanager-cli-sample/src/main/java/info/informationsea/commandmanager/cli/sample/LineEditor.java) for an example.
-* GUI : Not implemented yet.
+* CLI : See [LineEditor CLI](commandmanager-cli-sample/src/main/java/info/informationsea/commandmanager/cli/sample/LineEditor.java)
+* GUI : See [LineEditor GUI](commandmanager-gui-sample/src/main/java/info/informationsea/commandmanager/gui/sample/LineEditor.java)
 
 Author
 ------

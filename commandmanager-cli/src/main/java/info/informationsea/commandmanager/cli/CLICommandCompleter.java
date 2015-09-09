@@ -40,18 +40,18 @@ import java.util.Map;
 public class CLICommandCompleter implements Completer {
 
     @Getter
-    private CLICommandManager commandManager;
+    private CLICommandConsole commandConsole;
 
     private Map<String, StringsCompleter> optionCompleter = new HashMap<>();
     private StringsCompleter firstCommandCompleter;
 
-    public CLICommandCompleter(CLICommandManager manager) {
-        commandManager = manager;
+    public CLICommandCompleter(CLICommandConsole manager) {
+        commandConsole = manager;
 
-        Map<String, Class> map = commandManager.getCommands();
+        Map<String, Class> map = commandConsole.getCommandManager().getCommands();
         for (Map.Entry<String, Class> entry : map.entrySet()) {
 
-            CommandManager.OptionInfo optionInfo = commandManager.getOptionInfoForName(entry.getKey());
+            CommandManager.OptionInfo optionInfo = commandConsole.getCommandManager().getOptionInfoForName(entry.getKey());
             optionCompleter.put(entry.getKey(), new StringsCompleter(optionInfo.getOptions().values().stream().map(o -> o.option.toString()).toArray(String[]::new)));
         }
 
@@ -72,7 +72,7 @@ public class CLICommandCompleter implements Completer {
         }
 
         // complete command options
-        CommandManager.OptionInfo info = commandManager.getOptionInfoForName(shellParsed.get(0).getArg());
+        CommandManager.OptionInfo info = commandConsole.getCommandManager().getOptionInfoForName(shellParsed.get(0).getArg());
         ShellParser.ArgumentAndPosition lastComponent = shellParsed.get(shellParsed.size()-1);
 
         if (shellParsed.size() > 2) {
@@ -85,7 +85,7 @@ public class CLICommandCompleter implements Completer {
                 if (oh instanceof FileOptionHandler) {
                     c = new FileNameCompleter();
                 } else {
-                    ManagedCommand command = commandManager.getCommandInstance(shellParsed.get(0).getArg());
+                    ManagedCommand command = commandConsole.getCommandManager().getCommandInstance(shellParsed.get(0).getArg());
                     List<String> optionCandidates = command.getCandidateForOption(oneBeforeLast.getArg());
                     //log.info("optionCandidates {} for {}", optionCandidates, oneBeforeLast.getArg());
                     if (optionCandidates != null) {
@@ -114,10 +114,10 @@ public class CLICommandCompleter implements Completer {
             if (info.getArguments().get(argIndex) instanceof FileOptionHandler) {
                 c = new FileNameCompleter();
             } else {
-                ManagedCommand command = commandManager.getCommandInstance(shellParsed.get(0).getArg());
+                ManagedCommand command = commandConsole.getCommandManager().getCommandInstance(shellParsed.get(0).getArg());
 
-                if (command instanceof CLICommandManager.CLIBuiltinCommand) {
-                    ((CLICommandManager.CLIBuiltinCommand) command).setCommandManager(commandManager);
+                if (command instanceof CLICommandConsole.CLIBuiltinCommand) {
+                    ((CLICommandConsole.CLIBuiltinCommand) command).setCommandConsole(commandConsole);
                 }
 
                 List<String> argumentCandidates = command.getCandidateForArgument(argIndex);

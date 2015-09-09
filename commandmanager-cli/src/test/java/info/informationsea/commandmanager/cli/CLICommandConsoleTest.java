@@ -18,6 +18,7 @@
 
 package info.informationsea.commandmanager.cli;
 
+import info.informationsea.commandmanager.core.CommandManager;
 import info.informationsea.commandmanager.core.CommandResult;
 import info.informationsea.commandmanager.core.ManagedCommand;
 import lombok.Getter;
@@ -34,14 +35,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class CLICommandManagerTest {
+public class CLICommandConsoleTest {
 
-    private CLICommandManager commandManager = null;
+    private CommandManager commandManager = null;
+    private CLICommandConsole commandConsole = null;
     private Context context = null;
 
     @Before
     public void setup() {
-        commandManager = new CLICommandManager();
+        commandManager = new CommandManager();
+        commandConsole = new CLICommandConsole(commandManager);
         commandManager.addCommand("1", Command1.class);
         commandManager.addCommand("2", Command2.class);
         context = new Context();
@@ -50,30 +53,30 @@ public class CLICommandManagerTest {
 
     @Test
     public void testExecute() throws Exception {
-        Command1 command1 = (Command1) commandManager.getConfiguredCommandInstance("1 -a 4 -v hello");
+        Command1 command1 = (Command1) commandConsole.getConfiguredCommandInstance("1 -a 4 -v hello");
         Assert.assertEquals(4, command1.getA());
         Assert.assertTrue(command1.isV());
         Assert.assertEquals("hello", command1.getS());
 
-        commandManager.execute("1 -a 4 -v hello");
+        commandConsole.execute("1 -a 4 -v hello");
         Assert.assertEquals("4", context.map.get("a"));
         Assert.assertEquals("true", context.map.get("v"));
         Assert.assertEquals("hello", context.map.get("s"));
 
-        commandManager.execute(new String[]{"1", "hello!"});
+        commandConsole.execute(new String[]{"1", "hello!"});
         Assert.assertEquals("hello!", context.map.get("s"));
     }
 
     @Test
     public void testExecuteMany() throws Exception {
-        commandManager.executeMany("1 test ; 2");
+        commandConsole.executeMany("1 test ; 2");
         Assert.assertEquals("test", context.map.get("s"));
         Assert.assertEquals("true", context.map.get("2"));
     }
 
     @Test
     public void testLoadScript() throws Exception {
-        commandManager.loadScript(new InputStreamReader(getClass().getResourceAsStream("samplerun.txt")));
+        commandConsole.loadScript(new InputStreamReader(getClass().getResourceAsStream("samplerun.txt")));
         Assert.assertEquals("23", context.map.get("a"));
         Assert.assertEquals("hello", context.map.get("s"));
         Assert.assertEquals("true", context.map.get("2"));
@@ -81,8 +84,8 @@ public class CLICommandManagerTest {
 
     @Test
     public void testHelp() throws Exception {
-        commandManager.execute("help");
-        commandManager.execute("help 1");
+        commandConsole.execute("help");
+        commandConsole.execute("help 1");
     }
 
     @NoArgsConstructor

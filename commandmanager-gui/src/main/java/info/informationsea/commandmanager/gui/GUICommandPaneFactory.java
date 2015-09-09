@@ -88,7 +88,7 @@ public class GUICommandPaneFactory {
      * @param commandName a name of command
      * @return a TitledPane to configure and run a command.
      */
-    public TitledPane getCommandPane(String commandName) {
+    public Parent getCommandPane(String commandName) {
         HBox buttonBox = new HBox();
         Button runButton = new Button("Run");
         buttonBox.getChildren().add(runButton);
@@ -156,7 +156,7 @@ public class GUICommandPaneFactory {
             }
         });
 
-        return new TitledPane(commandName, vBox);
+        return vBox;
     }
 
 

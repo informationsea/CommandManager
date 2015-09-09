@@ -25,6 +25,7 @@ import info.informationsea.commandmanager.gui.GUICommandPaneFactory;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.TitledPane;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.kohsuke.args4j.Argument;
@@ -60,7 +61,7 @@ public class LineEditor extends Application {
 
         Accordion accordion = new Accordion();
         for (Map.Entry<String, Class> entry : commandManager.getCommands().entrySet()) {
-            accordion.getPanes().add(factory.getCommandPane(entry.getKey()));
+            accordion.getPanes().add(new TitledPane(entry.getKey(), factory.getCommandPane(entry.getKey())));
         }
 
         accordion.setPrefSize(800, 600);

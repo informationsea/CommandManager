@@ -18,6 +18,7 @@
 
 package info.informationsea.commandmanager.cli;
 
+import info.informationsea.commandmanager.core.CommandManager;
 import info.informationsea.commandmanager.core.CommandResult;
 import info.informationsea.commandmanager.core.ManagedCommand;
 import jline.console.completer.Completer;
@@ -39,18 +40,20 @@ import java.util.List;
 @Slf4j
 public class CLICommandCompleterTest {
 
-    private CLICommandManager commandManager = null;
+    private CommandManager commandManager = null;
+    private CLICommandConsole commandConsole = null;
 
     @Before
     public void setup() {
-        commandManager = new CLICommandManager();
+        commandManager = new CommandManager();
+        commandConsole = new CLICommandConsole(commandManager);
         commandManager.addCommand("access", Command1.class);
         commandManager.addCommand("acacia", Command2.class);
     }
 
     @Test
     public void testComplete() throws Exception {
-        CLICommandCompleter completer = new CLICommandCompleter(commandManager);
+        CLICommandCompleter completer = new CLICommandCompleter(commandConsole);
         assertCompleter(Arrays.<CharSequence>asList("acacia", "access"), 0, completer, "aca", 2);
         assertCompleter(Arrays.<CharSequence>asList("acacia", "access", "help", "source"), 0, completer, "", 0);
 

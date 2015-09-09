@@ -18,7 +18,8 @@
 
 package info.informationsea.commandmanager.cli.sample;
 
-import info.informationsea.commandmanager.cli.CLICommandManager;
+import info.informationsea.commandmanager.cli.CLICommandConsole;
+import info.informationsea.commandmanager.core.CommandManager;
 import info.informationsea.commandmanager.core.CommandResult;
 import info.informationsea.commandmanager.core.ManagedCommand;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,8 @@ import java.util.stream.Collectors;
  */
 public class LineEditor {
     public static void main(String ... args) {
-        CLICommandManager commandManager = new CLICommandManager();
+        CommandManager commandManager = new CommandManager();
+        CLICommandConsole commandConsole = new CLICommandConsole(commandManager);
         commandManager.addCommand("load", Load.class);
         commandManager.addCommand("insert", Insert.class);
         commandManager.addCommand("replace", Replace.class);
@@ -44,7 +46,7 @@ public class LineEditor {
         commandManager.setContext(new LineEditorContext());
 
         try {
-            commandManager.startConsole();
+            commandConsole.startConsole();
         } catch (IOException e) {
             e.printStackTrace();
         }
