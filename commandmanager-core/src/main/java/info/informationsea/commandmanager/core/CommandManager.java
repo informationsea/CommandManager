@@ -24,6 +24,7 @@ import lombok.Value;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.spi.OptionHandler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +122,19 @@ public class CommandManager {
                 this.options.put(one.option.toString(), one);
                 //log.info("option {} {}", one, one.option.toString());
             }
+        }
+
+        public static List<String> candidateOptions(OptionHandler optionHandler) {
+            Class clazz = optionHandler.setter.getType();
+            if (clazz.isEnum()) {
+                List<String> candidate = new ArrayList<>();
+                for (Object obj : clazz.getEnumConstants()) {
+                    candidate.add(obj.toString());
+                }
+                return candidate;
+            }
+
+            return null;
         }
     }
 }

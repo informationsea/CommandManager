@@ -21,6 +21,9 @@ package info.informationsea.commandmanager.core;
 import lombok.Getter;
 import org.junit.Assert;
 import org.junit.Test;
+import org.kohsuke.args4j.Option;
+
+import java.util.List;
 
 public class CommandManagerTest {
 
@@ -29,13 +32,16 @@ public class CommandManagerTest {
         CommandManager commandManager = new CommandManager();
         commandManager.addCommand("1", TestCommand1.class);
         commandManager.addCommand("2", TestCommand2.class);
+        commandManager.addCommand("3", TestCommand4.class);
 
         Assert.assertEquals(TestCommand1.class, commandManager.getCommandForName("1"));
         Assert.assertEquals(TestCommand2.class, commandManager.getCommandForName("2"));
-        Assert.assertEquals(2, commandManager.getCommands().size());
+        Assert.assertEquals(TestCommand4.class, commandManager.getCommandForName("3"));
+        Assert.assertEquals(3, commandManager.getCommands().size());
 
         Assert.assertEquals(TestCommand1.class, commandManager.getCommandInstance("1").getClass());
         Assert.assertEquals(TestCommand2.class, commandManager.getCommandInstance("2").getClass());
+        Assert.assertEquals(TestCommand4.class, commandManager.getCommandInstance("3").getClass());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -45,10 +51,19 @@ public class CommandManagerTest {
         commandManager.addCommand("1", TestCommand3.class);
     }
 
-    public static class TestCommand1 implements ManagedCommand {
-        @Getter
-        String commandName = "hello";
+    @Test
+    public void testCandidates() throws Exception {
+        CommandManager commandManager = new CommandManager();
+        commandManager.addCommand("test", TestCommand4.class);
+        CommandManager.OptionInfo optionInfo = commandManager.getOptionInfoForName("test");
+        List<String> candidates = CommandManager.OptionInfo.candidateOptions(optionInfo.getOptions().get("enum"));
+        Assert.assertNotNull(candidates);
+        Assert.assertArrayEquals(new Object[]{"OPTION", "ARGUMENT", "COMMAND"}, candidates.toArray());
 
+        Assert.assertNull(CommandManager.OptionInfo.candidateOptions(optionInfo.getOptions().get("sample")));
+    }
+
+    public static class TestCommand1 implements ManagedCommand {
         @Override
         public CommandResult execute() {
             return new CommandResult(null, CommandResult.ResultState.SUCCESS);
@@ -56,9 +71,6 @@ public class CommandManagerTest {
     }
 
     public static class TestCommand2 implements ManagedCommand {
-        @Getter
-        String commandName = "hello2";
-
         @Override
         public CommandResult execute() {
             return new CommandResult(null, CommandResult.ResultState.SUCCESS);
@@ -66,8 +78,22 @@ public class CommandManagerTest {
     }
 
     public static class TestCommand3 implements ManagedCommand {
-        @Getter
-        String commandName = "hello";
+        @Override
+        public CommandResult execute() {
+            return new CommandResult(null, CommandResult.ResultState.SUCCESS);
+        }
+    }
+
+    public static class TestCommand4 implements ManagedCommand {
+        enum OptionList {
+            OPTION, ARGUMENT, COMMAND
+        }
+
+        @Option(name = "enum") @Getter
+        private OptionList optionList;
+
+        @Option(name = "sample") @Getter
+        private String str;
 
         @Override
         public CommandResult execute() {

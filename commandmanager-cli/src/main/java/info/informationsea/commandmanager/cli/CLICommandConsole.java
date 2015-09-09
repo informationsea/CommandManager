@@ -119,6 +119,7 @@ public class CLICommandConsole {
      * The raw line will be parsed with {@code ShellParser}.
      * @param line a command and its arguments.
      * @throws Exception A argument parser may throw Exception.
+     * @return A configured command instance
      */
     public ManagedCommand getConfiguredCommandInstance(String line) throws Exception {
         List<String> args = ShellParser.parseShellLine(line);
@@ -130,6 +131,7 @@ public class CLICommandConsole {
      * Parameters of a command are configured with arguments.
      * @param args a command and its arguments.
      * @throws Exception A argument parser may throw Exception.
+     * @return A configured command instance
      */
     public ManagedCommand getConfiguredCommandInstance(String[] args) throws Exception {
         ManagedCommand command = commandManager.getCommandInstance(args[0]);

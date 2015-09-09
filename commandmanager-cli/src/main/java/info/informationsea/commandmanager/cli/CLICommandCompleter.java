@@ -87,7 +87,11 @@ public class CLICommandCompleter implements Completer {
                 } else {
                     ManagedCommand command = commandConsole.getCommandManager().getCommandInstance(shellParsed.get(0).getArg());
                     List<String> optionCandidates = command.getCandidateForOption(oneBeforeLast.getArg());
-                    //log.info("optionCandidates {} for {}", optionCandidates, oneBeforeLast.getArg());
+
+                    if (optionCandidates == null) {
+                        optionCandidates = CommandManager.OptionInfo.candidateOptions(oh);
+                    }
+
                     if (optionCandidates != null) {
                         c = new StringsCompleter(optionCandidates);
                     }
@@ -121,6 +125,9 @@ public class CLICommandCompleter implements Completer {
                 }
 
                 List<String> argumentCandidates = command.getCandidateForArgument(argIndex);
+                if (argumentCandidates == null) {
+                    argumentCandidates = CommandManager.OptionInfo.candidateOptions(info.getArguments().get(argIndex));
+                }
                 if (argumentCandidates != null) {
                     c = new StringsCompleter(argumentCandidates);
                 }

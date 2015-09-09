@@ -210,6 +210,17 @@ public class GUICommandPaneFactory {
             return spinner.valueProperty();
         }
 
+        if (optionHandler instanceof EnumOptionHandler) {
+            ChoiceBox<String> choiceBox = new ChoiceBox<>();
+            List<String> candidates = CommandManager.OptionInfo.candidateOptions(optionHandler);
+            if (candidates != null) {
+                choiceBox.getItems().addAll(candidates);
+                choiceBox.getSelectionModel().select(0);
+                gridPane.add(choiceBox, 1, position);
+                return choiceBox.itemsProperty();
+            }
+        }
+
         TextField textField = new TextField(optionHandler.printDefaultValue());
         gridPane.add(textField, 1, position);
         return textField.textProperty();
