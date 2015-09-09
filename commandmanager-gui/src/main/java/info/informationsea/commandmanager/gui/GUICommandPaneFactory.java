@@ -110,6 +110,9 @@ public class GUICommandPaneFactory {
                     Object optionValue = option2property.get("arg"+i).getValue();
                     if (arguments.get(i) instanceof FileOptionHandler) {
                         optionValue = new File(optionValue.toString());
+                    } else if (arguments.get(i) instanceof EnumOptionHandler) {
+                        log.info("{}", optionValue.toString());
+                        optionValue = Enum.valueOf(arguments.get(i).setter.getType(), optionValue.toString());
                     }
                     arguments.get(i).setter.addValue(optionValue);
                 }
@@ -217,7 +220,7 @@ public class GUICommandPaneFactory {
                 choiceBox.getItems().addAll(candidates);
                 choiceBox.getSelectionModel().select(0);
                 gridPane.add(choiceBox, 1, position);
-                return choiceBox.itemsProperty();
+                return choiceBox.getSelectionModel().selectedItemProperty();
             }
         }
 
