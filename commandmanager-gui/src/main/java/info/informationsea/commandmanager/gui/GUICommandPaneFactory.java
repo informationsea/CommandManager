@@ -71,6 +71,7 @@ public class GUICommandPaneFactory {
         int numberOfArguments = optionInfo.getArguments().size();
         for (int i = 0; i < numberOfArguments; i++) {
             OptionHandler optionHandler = optionInfo.getArguments().get(i);
+            //log.info("add {} {} {}", i, gridPane, optionHandler);
             option2property.put("arg" + i, addOption(gridPane, optionHandler, i));
         }
 
@@ -108,16 +109,11 @@ public class GUICommandPaneFactory {
             try {
                 for (int i = 0; i < arguments.size(); i++) {
                     Object optionValue = option2property.get("arg"+i).getValue();
-                    if (arguments.get(i) instanceof FileOptionHandler) {
-                        optionValue = new File(optionValue.toString());
-                    } else if (arguments.get(i) instanceof EnumOptionHandler) {
-                        log.info("{}", optionValue.toString());
-                        optionValue = Enum.valueOf(arguments.get(i).setter.getType(), optionValue.toString());
-                    }
-                    arguments.get(i).setter.addValue(optionValue);
+                    arguments.get(i).setter.addValue(convertProperObject(arguments.get(i), optionValue));
                 }
                 for (OptionHandler handler : parser.getOptions()) {
-                    handler.setter.addValue(option2property.get(handler.option.toString()).getValue());
+                    Object optionValue = option2property.get(handler.option.toString()).getValue();
+                    handler.setter.addValue(convertProperObject(handler, optionValue));
                 }
 
                 CommandResult result = command.execute();
@@ -162,6 +158,18 @@ public class GUICommandPaneFactory {
         return vBox;
     }
 
+    private Object convertProperObject(OptionHandler handler, Object optionValue) {
+        if (handler instanceof FileOptionHandler)
+            optionValue = new File(optionValue.toString());
+        else if (handler instanceof EnumOptionHandler)
+            optionValue = Enum.valueOf(handler.setter.getType(), optionValue.toString());
+        else if (handler instanceof DoubleOptionHandler)
+            optionValue = Double.parseDouble(optionValue.toString());
+        else if (handler instanceof IntOptionHandler)
+            optionValue = Integer.parseInt(optionValue.toString());
+        return optionValue;
+    }
+
 
     private ObservableValue addOption(GridPane gridPane, OptionHandler optionHandler, int position) {
         gridPane.add(new Label(optionHandler.option.usage()), 0, position);
@@ -197,10 +205,13 @@ public class GUICommandPaneFactory {
             return checkBox.selectedProperty();
         }
 
+        // disable following code due to unexpected behavior of Spinner
+        /*
         if (optionHandler instanceof IntOptionHandler) {
             Spinner<Integer> spinner = new Spinner<>();
             SpinnerValueFactory<Integer> factory = new SpinnerValueFactory.IntegerSpinnerValueFactory(Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.parseInt(optionHandler.printDefaultValue()));
             spinner.setValueFactory(factory);
+            spinner.setEditable(true);
             gridPane.add(spinner, 1, position);
             return spinner.valueProperty();
         }
@@ -209,16 +220,18 @@ public class GUICommandPaneFactory {
             Spinner<Double> spinner = new Spinner<>();
             SpinnerValueFactory<Double> factory = new SpinnerValueFactory.DoubleSpinnerValueFactory(Double.MIN_VALUE, Double.MAX_VALUE, Double.parseDouble(optionHandler.printDefaultValue()));
             spinner.setValueFactory(factory);
+            spinner.setEditable(true);
             gridPane.add(spinner, 1, position);
             return spinner.valueProperty();
         }
+        */
 
         if (optionHandler instanceof EnumOptionHandler) {
             ChoiceBox<String> choiceBox = new ChoiceBox<>();
             List<String> candidates = CommandManager.OptionInfo.candidateOptions(optionHandler);
             if (candidates != null) {
                 choiceBox.getItems().addAll(candidates);
-                choiceBox.getSelectionModel().select(0);
+                choiceBox.getSelectionModel().select(optionHandler.printDefaultValue());
                 gridPane.add(choiceBox, 1, position);
                 return choiceBox.getSelectionModel().selectedItemProperty();
             }

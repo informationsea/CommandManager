@@ -28,6 +28,7 @@ public class LineEditorCommands {
         commandManager.addCommand("replace", Replace.class);
         commandManager.addCommand("save", Save.class);
         commandManager.addCommand("print", Print.class);
+        commandManager.addCommand("dummy", Dummy.class);
         commandManager.setContext(new LineEditorContext());
     }
 
@@ -158,6 +159,51 @@ public class LineEditorCommands {
             lines.clear();
             lines.addAll(newList);
             return new CommandResult(null, CommandResult.ResultState.SUCCESS);
+        }
+    }
+
+    public static class Dummy extends AbstractLineEditorCommand {
+
+        enum SampleEnum {
+            FIRST, SECOND, THIRD, FOURTH, FIFTH
+        }
+
+        @Argument(index = 0, usage = "First string argument")
+        String arg0 = "Default value";
+
+        @Argument(index = 1, usage = "Double argument")
+        double arg1 = 1.2;
+
+        @Argument(index = 2, usage = "Integer argument")
+        int arg2 = 7;
+
+        @Argument(index = 3, usage = "Enum argument")
+        SampleEnum arg3 = SampleEnum.THIRD;
+
+
+        @Option(name = "-0", usage = "First string option")
+        String opt0 = "Option default value";
+
+        @Option(name = "-1", usage = "Double option")
+        double opt1 = 3.141592;
+
+        @Option(name = "-2", usage = "Integer option")
+        int opt2 = 11;
+
+        @Option(name = "-3", usage = "Enum option")
+        SampleEnum opt3 = SampleEnum.FIFTH;
+
+
+        @Override
+        public CommandResult execute() throws Exception {
+            return new CommandResult("Argument 0 = " + arg0 + "\n" +
+                    "Argument 1 = " + arg1 + "\n" +
+                    "Argument 2 = " + arg2 + "\n" +
+                    "Argument 3 = " + arg3 + "\n" +
+                    "Option 0 = " + opt0 + "\n" +
+                    "Option 1 = " + opt1 + "\n" +
+                    "Option 2 = " + opt2 + "\n" +
+                    "Option 3 = " + opt3 + "\n", CommandResult.ResultState.SUCCESS);
         }
     }
 }
