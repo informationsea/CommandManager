@@ -90,6 +90,16 @@ public class GUICommandPaneFactory {
      * @return a TitledPane to configure and run a command.
      */
     public Parent getCommandPane(String commandName) {
+        return getCommandPane(commandName, null);
+    }
+
+        /**
+         * Get a configuration pane with the run button.
+         * @param commandName a name of command
+         * @param listener notify command event
+         * @return a TitledPane to configure and run a command.
+         */
+    public Parent getCommandPane(String commandName, CommandEventListener listener) {
         HBox buttonBox = new HBox();
         Button runButton = new Button("Run");
         buttonBox.getChildren().add(runButton);
@@ -109,29 +119,36 @@ public class GUICommandPaneFactory {
             try {
                 for (int i = 0; i < arguments.size(); i++) {
                     Object optionValue = option2property.get("arg"+i).getValue();
+                    //noinspection unchecked
                     arguments.get(i).setter.addValue(convertProperObject(arguments.get(i), optionValue));
                 }
                 for (OptionHandler handler : parser.getOptions()) {
                     Object optionValue = option2property.get(handler.option.toString()).getValue();
+                    //noinspection unchecked
                     handler.setter.addValue(convertProperObject(handler, optionValue));
                 }
 
                 CommandResult result = command.execute();
+
+                CommandEventListener.CommandEvent commandEvent;
 
                 Alert.AlertType type = Alert.AlertType.ERROR;
                 String headerText = "";
                 switch (result.getState()) {
                     case SUCCESS:
                         type = Alert.AlertType.INFORMATION;
+                        commandEvent = CommandEventListener.CommandEvent.SUCCESS;
                         headerText = "Command executed successfully";
                         break;
                     case WARN:
                         type = Alert.AlertType.WARNING;
+                        commandEvent = CommandEventListener.CommandEvent.WARN;
                         headerText = "Command executed with warning";
                         break;
                     case ERROR:
                     default:
                         type = Alert.AlertType.ERROR;
+                        commandEvent = CommandEventListener.CommandEvent.ERROR;
                         headerText = "Command executed with error";
                         break;
                 }
@@ -148,7 +165,10 @@ public class GUICommandPaneFactory {
                     alert.getDialogPane().setExpandableContent(textArea);
                 }
 
-                alert.show();
+                alert.showAndWait();
+
+                if (listener != null)
+                    listener.finishCommand(commandEvent, command);
             } catch (Exception e1) {
                 e1.printStackTrace();
                 showExceptionAlert("Failed to run", e1);
@@ -256,5 +276,16 @@ public class GUICommandPaneFactory {
         textArea.setEditable(false);
         alert.getDialogPane().setExpandableContent(textArea);
         alert.showAndWait();
+    }
+
+    public interface CommandEventListener {
+
+        enum CommandEvent {
+            SUCCESS,
+            WARN,
+            ERROR
+        }
+
+        void finishCommand(CommandEvent commandEvent, ManagedCommand managedCommand);
     }
 }
