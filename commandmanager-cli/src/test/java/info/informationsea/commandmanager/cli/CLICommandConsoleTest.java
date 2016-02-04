@@ -83,6 +83,14 @@ public class CLICommandConsoleTest {
     }
 
     @Test
+    public void testLoadScript2() throws Exception {
+        commandConsole.loadScript(new InputStreamReader(getClass().getResourceAsStream("samplerun2.txt")));
+        Assert.assertEquals("23", context.map.get("a"));
+        Assert.assertEquals("hello", context.map.get("s"));
+        Assert.assertEquals("true", context.map.get("2"));
+    }
+
+    @Test
     public void testHelp() throws Exception {
         commandConsole.execute("help");
         commandConsole.execute("help 1");

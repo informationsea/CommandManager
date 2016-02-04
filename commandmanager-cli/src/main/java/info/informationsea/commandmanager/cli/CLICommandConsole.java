@@ -77,14 +77,16 @@ public class CLICommandConsole {
                 String[] newArgs = new String[i-startPos];
                 System.arraycopy(args, startPos, newArgs, 0, i-startPos);
                 //log.info("run {}", (Object) newArgs);
-                execute(newArgs);
+                if (newArgs.length > 0)
+                    execute(newArgs);
                 startPos = i+1;
             }
         }
         String[] newArgs = new String[args.length-startPos];
         System.arraycopy(args, startPos, newArgs, 0, args.length-startPos);
         //log.info("run last {}", (Object) newArgs);
-        execute(newArgs);
+        if (newArgs.length > 0)
+            execute(newArgs);
     }
 
     /**
